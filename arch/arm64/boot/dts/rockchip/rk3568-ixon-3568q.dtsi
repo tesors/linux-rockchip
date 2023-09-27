@@ -373,10 +373,10 @@
 };
 
 &wireless_bluetooth {
-	BT,reset_gpio    = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>;
-	BT,wake_gpio     = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>;
-	BT,wake_host_irq = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>;
-	status = "disabled";
+	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
+	BT,wake_gpio     = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
+	BT,wake_host_irq = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
+	status = "okay";
 };
 
 &spdif_8ch{
