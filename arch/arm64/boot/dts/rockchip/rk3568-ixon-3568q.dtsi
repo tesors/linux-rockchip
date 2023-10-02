@@ -362,10 +362,6 @@
 	led_status_value = <0x6940>;
 };
 
-&uart0 {
-	status = "okay";
-};
-
 &uart8 {
 	status = "disabled";
 };
@@ -377,6 +373,9 @@
 };
 
 &wireless_bluetooth {
+
+	pinctrl-names = "default", "rts_gpio";
+	pinctrl-1 = <&uart0_gpios>;
 	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
 	BT,wake_gpio     = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
 	BT,wake_host_irq = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
@@ -384,8 +383,6 @@
 	uart_rts_gpios   = <&gpio0 RK_PC4 GPIO_ACTIVE_LOW>;
 
 	status = "okay";
-	/delete-property/ clocks;
-	/delete-property/ clock-names;
 };
 
 &spdif_8ch{
@@ -503,6 +500,13 @@
 			rockchip,pins =
 			<0  RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>,			//Interupt pin
 			<0  RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;				//Reset pin should have external 10 kOmh resistor.
+		};
+	};
+
+	wireless-bluetooth {
+		uart0_gpios: uart0-gpios {
+			rockchip,pins =
+				<0 RK_PC4 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
