@@ -362,6 +362,10 @@
 	led_status_value = <0x6940>;
 };
 
+&uart0 {
+	status = "okay";
+};
+
 &uart8 {
 	status = "disabled";
 };
@@ -376,7 +380,12 @@
 	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
 	BT,wake_gpio     = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
 	BT,wake_host_irq = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
+
+	uart_rts_gpios   = <&gpio0 RK_PC4 GPIO_ACTIVE_LOW>;
+
 	status = "okay";
+	/delete-property/ clocks;
+	/delete-property/ clock-names;
 };
 
 &spdif_8ch{
