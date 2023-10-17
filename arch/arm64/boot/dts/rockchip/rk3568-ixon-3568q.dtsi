@@ -158,16 +158,16 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart0_xfer>;
 	dma-names = "tx", "rx";
-	status = "okay";
+	status = "disabled";
 
-	bluetooth {
-		compatible = "qcom,qca6174-bt";
-
-		enable-gpios = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "blt_enable";
+// 	bluetooth {
+// 		compatible = "qcom,qca6174-bt";
+//
+// 		enable-gpios = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
+// 		pinctrl-names = "blt_enable";
 // 		clocks = <&divclk4>;
-// 		firmware-name = "nvm_00440302.bin";
-	};
+//  		firmware-name = "firmware-4.bin";
+// 	};
 
 };
 
@@ -385,22 +385,21 @@
 	post-power-on-delay-ms = <100>;
 };
 
-// &wireless_bluetooth {
-//  	pinctrl-names = "default", "rts_gpio";
-//
-// 	clocks = <&rk809 1>;
-//  	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
-//  	BT,wake_gpio     = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
-//  	BT,wake_host_irq = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
-//
-//  	uart_rts_gpios   = <&gpio0 RK_PC4 GPIO_ACTIVE_LOW>;
-//  	pinctrl-0 = <&uart0_rtsn>;
-// 	pinctrl-1 = <&uart0_gpios>;
+&wireless_bluetooth {
+  	pinctrl-names = "default", "rts_gpio";
 
-//  	/delete-property/ pinctrl-0;
-//  	/delete-property/ pinctrl-1;
-// 	status = "okay";
-// };
+  	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
+  	BT,wake_gpio     = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
+  	BT,wake_host_irq = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
+
+  	uart_rts_gpios   = <&gpio0 RK_PC4 GPIO_ACTIVE_LOW>;
+  	pinctrl-0 = <&uart0_rtsn>;
+ 	pinctrl-1 = <&uart0_gpios>;
+
+  	/delete-property/ pinctrl-0;
+  	/delete-property/ pinctrl-1;
+ 	status = "disabled";
+ };
 
 /delete-node/ &wireless_bluetooth;
 
@@ -522,12 +521,12 @@
 		};
 	};
 
-	bluetooth {
-		blt_enable: blt_enable {
-			rockchip,pins =
-				<4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;
-
-		};
-	};
+// 	bluetooth {
+// 		blt_enable: blt_enable {
+// 			rockchip,pins =
+// 				<4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;
+//
+// 		};
+// 	};
 
 };
