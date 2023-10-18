@@ -140,7 +140,7 @@
 		enable-gpios = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "blt_enable";
 // 		clocks = <&divclk4>;
-		firmware-name = "firmware-4.bin";
+		firmware-name = "nvm_00440302.bin";
 	};
 
 };
