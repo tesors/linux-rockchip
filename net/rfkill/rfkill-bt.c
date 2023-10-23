@@ -309,7 +309,6 @@ static int proc_rk_set_power(void *data, bool blocked)
 		rfkill_rk_sleep_bt(BT_WAKEUP); // ensure bt is wakeup
 
 		if (gpio_is_valid(wake_host->io)) {
-			printk("Message is comming from here!!!\n");
 			LOG("%s: set bt wake_host high!\n", __func__);
 			gpio_direction_output(wake_host->io, 1);
 			msleep(20);
@@ -377,7 +376,6 @@ static int proc_rk_set_power(void *data, bool blocked)
 			}
 		}
 	}
-	printk("get out off set power!\n");
 	return 0;
 }
 
@@ -417,7 +415,6 @@ static int rfkill_rk_set_power(void *data, bool blocked)
 		rfkill_rk_sleep_bt(BT_WAKEUP); // ensure bt is wakeup
 
 		if (gpio_is_valid(wake_host->io)) {
-			printk("Message is comming from here!!!\n");
 			LOG("%s: set bt wake_host high!\n", __func__);
 			gpio_direction_output(wake_host->io, 1);
 			msleep(20);
@@ -711,7 +708,6 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	struct proc_dir_entry *ent;
 
 	DBG("Enter %s\n", __func__);
-	printk("First printk!\n");
 	if (!pdata) {
 #ifdef CONFIG_OF
 		pdata = devm_kzalloc(&pdev->dev,
@@ -740,19 +736,16 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	rfkill->pdata = pdata;
 	rfkill->pdev = pdev;
 	g_rfkill = rfkill;
-	printk("Second printk!\n");
 	bluetooth_dir = proc_mkdir("bluetooth", NULL);
 	if (!bluetooth_dir) {
 		LOG("Unable to create /proc/bluetooth directory");
 		return -ENOMEM;
 	}
-	printk("Third printk!\n");
 	sleep_dir = proc_mkdir("sleep", bluetooth_dir);
 	if (!sleep_dir) {
 		LOG("Unable to create /proc/%s directory", PROC_DIR);
 		return -ENOMEM;
 	}
-	printk("Fourth printk!\n");
 	/* read/write proc entries */
 	ent = proc_create("lpm", 0444, sleep_dir, &bluesleep_lpm);
 	if (!ent) {
@@ -760,7 +753,6 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto fail_alloc;
 	}
-	printk("Fifth printk!\n");
 	/* read/write proc entries */
 	ent = proc_create("btwrite", 0444, sleep_dir, &bluesleep_btwrite);
 	if (!ent) {
@@ -826,7 +818,6 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, rfkill);
-	printk("Device is registered\n");
 	LOG("%s device registered.\n", pdata->name);
 
 	return 0;
@@ -842,7 +833,6 @@ fail_setup_wake_irq:
 fail_gpio:
 
 	g_rfkill = NULL;
-	printk("Device registered!\n");
 	return ret;
 }
 
