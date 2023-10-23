@@ -376,6 +376,7 @@ static int proc_rk_set_power(void *data, bool blocked)
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -708,6 +709,7 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	struct proc_dir_entry *ent;
 
 	DBG("Enter %s\n", __func__);
+
 	if (!pdata) {
 #ifdef CONFIG_OF
 		pdata = devm_kzalloc(&pdev->dev,
@@ -736,16 +738,19 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	rfkill->pdata = pdata;
 	rfkill->pdev = pdev;
 	g_rfkill = rfkill;
+
 	bluetooth_dir = proc_mkdir("bluetooth", NULL);
 	if (!bluetooth_dir) {
 		LOG("Unable to create /proc/bluetooth directory");
 		return -ENOMEM;
 	}
+
 	sleep_dir = proc_mkdir("sleep", bluetooth_dir);
 	if (!sleep_dir) {
 		LOG("Unable to create /proc/%s directory", PROC_DIR);
 		return -ENOMEM;
 	}
+
 	/* read/write proc entries */
 	ent = proc_create("lpm", 0444, sleep_dir, &bluesleep_lpm);
 	if (!ent) {
@@ -753,6 +758,7 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto fail_alloc;
 	}
+
 	/* read/write proc entries */
 	ent = proc_create("btwrite", 0444, sleep_dir, &bluesleep_btwrite);
 	if (!ent) {
@@ -818,6 +824,7 @@ static int rfkill_rk_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, rfkill);
+
 	LOG("%s device registered.\n", pdata->name);
 
 	return 0;
