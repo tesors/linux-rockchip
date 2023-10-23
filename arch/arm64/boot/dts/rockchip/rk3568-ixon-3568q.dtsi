@@ -3,8 +3,11 @@
  * Copyright (c) 2020 Rockchip Electronics Co., Ltd.
  *
  */
+
 #include "rk3568-firefly-port.dtsi"
+
 / {
+
 	usb2_hub_reset: usb2-hub-reset-regulator {
 		compatible = "regulator-fixed";
 		enable-active-high;
@@ -12,6 +15,7 @@
 		regulator-name = "usb2_hub_reset_n";
 		regulator-always-on;
 	};
+
 	usb3_hub_reset: usb3-hub-reset-regulator {
 		compatible = "regulator-fixed";
 		enable-active-high;
@@ -20,9 +24,11 @@
 		regulator-always-on;
 	};
 };
+
 &csi2_dphy0 {
 	status = "disabled";
 };
+
 &csi2_dphy1 {
 	status = "disabled";
 	/*
@@ -31,6 +37,7 @@
 	* full mode and split mode are mutually exclusive
 	*/
 };
+
 &csi2_dphy2 {
 	status = "disabled";
 	/*
@@ -39,12 +46,15 @@
 	* full mode and split mode are mutually exclusive
 	*/
 };
+
 &rkisp_vir0 {
 	status = "disabled";
 };
+
 &rkisp_vir1 {
 	status = "disabled";
 };
+
 &i2c0 {
     status = "okay";
     sensor@3c{
@@ -54,6 +64,7 @@
         //wd-en-gpio = <&gpio3 23 GPIO_ACTIVE_HIGH>;
     };
 };
+
 &i2c1 {
 	status = "okay";
 	rv3028@52 {
@@ -68,6 +79,7 @@
 		compatible = "infineon,slb9673", "tcg,tpm-tis-i2c";
 		reg = <0x2e>;
 	};
+
 	slb9673@2e{
 		compatible = "infineon,slb9673","tcg,tpm-tis-i2c" ;
 		reg = <0x2e>;
@@ -77,6 +89,7 @@
 		pinctrl-0 = <&slb9673_gpio>;
 		status = "okay";
     };
+
 	gt1x@14 {
 		status = "okay";
 		compatible = "goodix,gt911";
@@ -87,48 +100,60 @@
 		goodix,irq-gpio   = <&gpio0 RK_PB5 IRQ_TYPE_EDGE_RISING>; //Interrupt gpio which is to provide interrupts to  host, same as "interrupts" node.
 		goodix,rst-gpio   = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;	  //Reset gpio to control the reset of chip
 		irq-flag  = <1>;                                          //1 for rising edge trigger, 2 for failing edge trigger
+
 		touchscreen-size-x = <240>;
 		touchscreen-size-y = <240>;
 	};
 	/delete-node/ xc6130@23;
 };
+
 &i2c2{
 	status = "disabled";
 	pinctrl-0 = <&i2c2m1_xfer>;
 };
+
 &i2c4{
 	status = "disabled";
 };
+
 &vcc_camera {
 	status = "disabled";
 };
+
 &pwm11 {
 	status = "disabled";
 };
+
 &pwm14 {
 	status = "disabled";
 };
+
 &i2c5 {
     status = "disabled";
     /delete-node/ hym8563@51;
 	/delete-node/ mxc6655xa;
 };
+
 &mc3230 {
     status = "disabled";
 };
+
 &pca9555 {
     status = "disabled";
 };
+
 &uart9 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart9m1_xfer>;
 	status = "disabled";
 };
+
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart3m0_xfer>;
 	status = "okay";
 };
+
 &uart0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart0_xfer &uart0_ctsn &uart0_rtsn>;
@@ -147,20 +172,22 @@
 &pcie30phy {
        status = "okay";
 };
+
 &spi1 {
 	status = "disabled";
 	/delete-property/ pinctrl-0;
 	/delete-property/ pinctrl-1;
 	/delete-property/ spi_wk2xxx;
 };
+
 &spi3 {
 	status = "okay";
 	max-freq = <48000000>;
 	pinctrl-0 = <&spi3m1_pins>;
 	pinctrl-1 = <&spi3m1_cs0>;
+
 	#address-cells = <1>;
 	#size-cells = <0>;
-
 
 	NanoAirTFT:NanoAirTFT@0 {
 		compatible = "sitronix,st7789v";
@@ -174,7 +201,6 @@
 		rotate = <0>;
 		width = <240>;
 		height = <240>;
-
 		reset-gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
 		dc-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
 		led-gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
@@ -189,16 +215,21 @@
 &pcie3x2 {
     status = "okay";
 };
+
 &its {
     status = "okay";
 };
+
 &can1 {
     status = "disabled";
 };
+
 &can2 {
     status = "disabled";
 };
+
 /delete-node/ &vcc3v3_vga;
+
 &gmac0 {
 	/delete-property/ phy-handle;
     status = "okay";
@@ -206,10 +237,12 @@
 	rx_delay = <0x0f>;
 // 	snps,reset-gpio = <&gpio0 RK_PD5 GPIO_ACTIVE_LOW>;
 // 	snps,reset-gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_LOW>;
+
 	clock_in_out = "output";
 	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>;
 	assigned-clock-rates = <0>, <125000000>;
 	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>;
+
 	pinctrl-names = "default";
 	pinctrl-0 = <&gmac0_gpio
 			&gmac0_miim
@@ -224,15 +257,18 @@
 		pause;
 	};
 };
+
 &gmac1 {
     status = "okay";
     tx_delay = <0x4d>;
     rx_delay = <0x2d>;
 	snps,reset-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+
 	clock_in_out = "output";
 	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>;
 	assigned-clock-rates = <0>, <125000000>;
 	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
+
 	pinctrl-names = "default";
 	pinctrl-0 = <&gmac1m1_miim
 		     &gmac1m1_tx_bus2
@@ -240,9 +276,11 @@
 		     &gmac1m1_rgmii_clk
 		     &gmac1m1_rgmii_bus>;
 };
+
 &mdio0 {
 	#address-cells = <1>;
 	#size-cells = <0>;
+
 	rtl_switch: switch@0 {
 		compatible = "realtek,rtl8365mb";
 		reg = <0>;
@@ -257,22 +295,27 @@
 		ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
+
 			port@0 {
 				reg = <0>;
 				label = "lan4";
 			};
+
 			port@1 {
 				reg = <1>;
 				label = "lan3";
 			};
+
 			port@2 {
 				reg = <2>;
 				label = "lan2";
 			};
+
 			port@3 {
 				reg = <3>;
 				label = "lan1";
 			};
+
 			port@6 {
 				reg = <6>;
 				label = "cpu";
@@ -286,44 +329,32 @@
 		};
 	};
 };
+
 &rgmii_phy0 {
 	status = "disabled";
 	led_status_value = <0x6940>;
 };
+
 &rgmii_phy1 {
 	led_status_value = <0x6940>;
 };
+
 &uart8 {
 	status = "disabled";
 };
+
 &sdio_pwrseq {
 	status = "okay";
 	reset-gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
 	post-power-on-delay-ms = <100>;
 };
 
-// &wireless_bluetooth {
-//  	pinctrl-names = "default", "rts_gpio";
-//
-// 	clocks = <&rk809 1>;
-//  	BT,reset_gpio    = <&gpio4 RK_PD0 GPIO_ACTIVE_HIGH>;
-//  	BT,wake_gpio     = <&gpio4 RK_PC7 GPIO_ACTIVE_HIGH>;
-//  	BT,wake_host_irq = <&gpio4 RK_PC4 GPIO_ACTIVE_HIGH>;
-//
-//  	uart_rts_gpios   = <&gpio0 RK_PC4 GPIO_ACTIVE_LOW>;
-//  	pinctrl-0 = <&uart0_rtsn>;
-// 	pinctrl-1 = <&uart0_gpios>;
-//
-//   	/delete-property/ pinctrl-0;
-//   	/delete-property/ pinctrl-1;
-//  	status = "disabled";
-//  };
-
 /delete-node/ &wireless_bluetooth;
 
 &spdif_8ch{
     status = "disabled";
 };
+
 &rk809_codec {
     spk-ctl-gpios = <&pca9555 PCA_IO0_7 GPIO_ACTIVE_HIGH>;
 	/delete-property/ pinctrl-1;
@@ -331,46 +362,59 @@
     hp-det-adc-value = <200>;
     hp-adc-drift-scope = <200>;
 };
+
 &rk809 {
     rtc {
         status = "disabled";
     };
 };
+
 &pwm7 {
 	status = "disabled";
 };
+
 &sata1 {
 	status = "okay";
 };
+
 &sata2 {
 	status = "disabled";
 	/delete-property/ pinctrl-0;
 };
+
 &pcie2x1 {
 	status = "okay";
 	pinctrl-0 = <&pcie20m1_pins>;
 	pinctrl-1 = <&wlanen_pins>;
 	reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;
 };
+
 &hdmi {
 	status = "disabled";
 };
+
 &hdmi_in_vp0 {
 	status = "disabled";
 };
+
 &hdmi_in_vp1 {
 	status = "disabled";
 };
+
 &hdmi_sound {
 	status = "disabled";
 };
+
 &dfi {
        status = "okay";
 };
+
 &dmc {
        status = "okay";
 };
+
 &pinctrl {
+
 	slb9673 {
 		slb9673_gpio: slb9673-gpio{
 			rockchip,pins =
@@ -387,6 +431,7 @@
 				<3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
+
 	pcie30x2 {
 		pcie30x2m1_pins: pcie30x2m1-pins {
 			rockchip,pins =
@@ -398,6 +443,7 @@
 				<2 RK_PD5 4 &pcfg_pull_none>;
 		};
 	};
+
 	pcie20x2 {
 		wlanen_pins: wlanen_pins {
 			rockchip,pins =
@@ -405,6 +451,7 @@
 				<4 RK_PD1 RK_FUNC_GPIO &pcfg_pull_up_drv_level_1>;
 		};
 	};
+
 	display {
 	display_pins: display_pins {
 		rockchip,pins =
