@@ -243,6 +243,22 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 			val_rxdly ? "enabled" : "disabled");
 	}
 
+    //LED0 (Yellow) Link Mode (10/100/1000 Mbps) + Active (RX/TX active) {set 0x001b}
+    //LED1 (Green)  Link Mode (10/100/1000 Mbps) + Active (RX/TX active) {set 0x0360}
+	ret = phy_modify_paged_changed(phydev, 0xd04, 0x16, 0x6f7b,
+				       0x037b);
+	if (ret < 0) {
+		dev_err(dev, "Failed to update the LED controling register\n");
+		return ret;
+	} else if (ret) {
+		dev_dbg(dev,
+			"Successfully set PHY LED0 and LED1 mode detection\n");
+	} else {
+		dev_dbg(dev,
+			"No change was applied\n");
+		return ret;
+	}
+
 	return 0;
 }
 
