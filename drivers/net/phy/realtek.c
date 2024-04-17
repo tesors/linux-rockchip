@@ -28,6 +28,7 @@
 
 #define RTL8211F_PHYCR1				0x18
 #define RTL8211F_INSR				0x1d
+#define RTL8211F_LCR                0X10
 
 #define RTL8211F_TX_DELAY			BIT(8)
 #define RTL8211F_RX_DELAY			BIT(3)
@@ -179,7 +180,7 @@ static int rtl8211c_config_init(struct phy_device *phydev)
 	/* RTL8211C has an issue when operating in Gigabit slave mode */
 	return phy_set_bits(phydev, MII_CTRL1000,
 			    CTL1000_ENABLE_MASTER | CTL1000_AS_MASTER);
-	ret = phy_write_paged(phydev, 0xd04, 0x16, 0x037b);
+	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, 0x037b);
 	if (ret < 0)
 		printk("Failed to update the LED controling register\n");
 	else if (ret)
@@ -253,7 +254,7 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 			val_rxdly ? "enabled" : "disabled");
 	}
 
-	ret = phy_write_paged(phydev, 0xd04, 0x16, 0x037b);
+	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, 0x037b);
 	if (ret < 0)
 		printk("Failed to update the LED controling register\n");
 	else if (ret)
