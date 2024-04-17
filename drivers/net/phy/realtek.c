@@ -28,7 +28,7 @@
 
 #define RTL8211F_PHYCR1				0x18
 #define RTL8211F_INSR				0x1d
-#define RTL8211F_LCR                0X10
+#define RTL8211F_LCR                0x10
 
 #define RTL8211F_TX_DELAY			BIT(8)
 #define RTL8211F_RX_DELAY			BIT(3)
