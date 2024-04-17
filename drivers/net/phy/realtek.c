@@ -8,6 +8,7 @@
  * Copyright (c) 2004 Freescale Semiconductor, Inc.
  */
 #include <linux/bitops.h>
+#include <dt-bindings/net/realtek.h>
 #include <linux/phy.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -172,21 +173,56 @@ static int rtl8211_config_aneg(struct phy_device *phydev)
 	return 0;
 }
 
-static int rtl8211c_config_init(struct phy_device *phydev)
-{	printk("rtl8211c_config_init");
-
+static void rtl8211f_config_led(struct phy_device *phydev)
+{	printk("rtl8211f_config_led");
+	struct device *dev = &phydev->mdio.dev;
+	struct device_node *of_node = dev->of_node;
+	u16 val;
+	u32 led_mode, led0_ctrl, led1_ctrl, led2_ctrl;
 	int ret;
 
+	ret = of_property_read_u32(of_node, "realtek,led-mode", &led_mode);
+	if (ret < 0) {
+		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led-mode' in dtb\n");
+		return;
+	}
+	ret = of_property_read_u32(of_node, "realtek,led0-control", &led0_ctrl);
+	if (ret < 0) {
+		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led0-control' in dtb\n");
+		return;
+	}
+	ret = of_property_read_u32(of_node, "realtek,led1-control", &led1_ctrl);
+	if (ret < 0) {
+		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led1-control' in dtb\n");
+		return;
+	}
+
+	val = (led_mode << 15) |
+	      (led1_ctrl << 5) | led0_ctrl;
+
+	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, val);
+	if (ret < 0)
+		dev_dbg(dev, "Failed to update the LED control register\n");
+}
+
+static int rtl8211f_config_aneg(struct phy_device *phydev)
+{   printk("rtl8211f_config_aneg");
+	int ret;
+
+	rtl8211f_config_led(phydev);
+
+	ret = genphy_config_aneg(phydev);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
+static int rtl8211c_config_init(struct phy_device *phydev)
+{
 	/* RTL8211C has an issue when operating in Gigabit slave mode */
 	return phy_set_bits(phydev, MII_CTRL1000,
 			    CTL1000_ENABLE_MASTER | CTL1000_AS_MASTER);
-	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, 0x037b);
-	if (ret < 0)
-		printk("Failed to update the LED controling register\n");
-	else if (ret)
-		printk("Successfully set PHY LED0 and LED1 mode detection\n");
-	else
-		printk("No change was applied\n");
 }
 
 static int rtl8211f_config_init(struct phy_device *phydev)
@@ -254,28 +290,13 @@ static int rtl8211f_config_init(struct phy_device *phydev)
 			val_rxdly ? "enabled" : "disabled");
 	}
 
-	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, 0x037b);
-	if (ret < 0)
-		printk("Failed to update the LED controling register\n");
-	else if (ret)
-		printk("Successfully set PHY LED0 and LED1 mode detection\n");
-	else
-		printk("No change was applied\n");
-
-    //LED0 (Yellow) Link Mode (10/100/1000 Mbps) + Active (RX/TX active) {set 0x001b}
-    //LED1 (Green)  Link Mode (10/100/1000 Mbps) + Active (RX/TX active) {set 0x0360}
-// 	ret = phy_modify_paged_changed(phydev, 0xd04, 0x16, 0x6f7b,
-// 				       0x037b);
-// 	if (ret < 0) {
+// 	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, 0x037b);
+// 	if (ret < 0)
 // 		printk("Failed to update the LED controling register\n");
-// 		return ret;
-// 	} else if (ret) {
-// 		printk(
-// 			"Successfully set PHY LED0 and LED1 mode detection\n");
-// 	} else {
+// 	else if (ret)
+// 		printk("Successfully set PHY LED0 and LED1 mode detection\n");
+// 	else
 // 		printk("No change was applied\n");
-// 		return ret;
-// 	}
 
 	return 0;
 }
@@ -667,6 +688,7 @@ static struct phy_driver realtek_drvs[] = {
 	}, {
 		PHY_ID_MATCH_EXACT(0x001cc916),
 		.name		= "RTL8211F Gigabit Ethernet",
+		.config_aneg	= rtl8211f_config_aneg,
 		.config_init	= &rtl8211f_config_init,
 		.ack_interrupt	= &rtl8211f_ack_interrupt,
 		.config_intr	= &rtl8211f_config_intr,
