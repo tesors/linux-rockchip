@@ -5,6 +5,7 @@
  */
 
 #include "rk3568-firefly-port.dtsi"
+#include <dt-bindings/net/realtek.h>
 
 / {
 
@@ -444,11 +445,15 @@
 			};
 		};
 	};
+};
+
+&mdio1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 
 	ethphy: ethernet-phy@1 {
 		compatible = "realtek,rtl8211f";
 		reg = <1>;
-		realtek,eee-led-mode-disable;
 	};
 };
 
