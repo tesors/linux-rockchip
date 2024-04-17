@@ -178,31 +178,33 @@ static void rtl8211f_config_led(struct phy_device *phydev)
 	struct device *dev = &phydev->mdio.dev;
 	struct device_node *of_node = dev->of_node;
 	u16 val;
-	u32 led_mode, led0_ctrl, led1_ctrl, led2_ctrl;
+	u32 led_mode, led0_ctrl, led1_ctrl;
 	int ret;
 
-	ret = of_property_read_u32(of_node, "realtek,led-mode", &led_mode);
-	if (ret < 0) {
-		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led-mode' in dtb\n");
-		return;
-	}
-	ret = of_property_read_u32(of_node, "realtek,led0-control", &led0_ctrl);
-	if (ret < 0) {
-		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led0-control' in dtb\n");
-		return;
-	}
-	ret = of_property_read_u32(of_node, "realtek,led1-control", &led1_ctrl);
-	if (ret < 0) {
-		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led1-control' in dtb\n");
-		return;
-	}
-
+// 	ret = of_property_read_u32(of_node, "realtek,led-mode", &led_mode);
+// 	if (ret < 0) {
+// 		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led-mode' in dtb\n");
+// 		return;
+// 	}
+// 	ret = of_property_read_u32(of_node, "realtek,led0-control", &led0_ctrl);
+// 	if (ret < 0) {
+// 		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led0-control' in dtb\n");
+// 		return;
+// 	}
+// 	ret = of_property_read_u32(of_node, "realtek,led1-control", &led1_ctrl);
+// 	if (ret < 0) {
+// 		dev_dbg(dev, "refusing to reconfigure leds: no 'realtek,led1-control' in dtb\n");
+// 		return;
+// 	}
+	led_mode  = RTL8211F_LED_MODE_A;
+	led1_ctrl = RTL8211F_LINK_10_100_1000_ACTIVITY;
+	led0_ctrl = RTL8211F_LINK_10_100_1000_ACTIVITY;
 	val = (led_mode << 15) |
 	      (led1_ctrl << 5) | led0_ctrl;
 
 	ret = phy_write_paged(phydev, 0xd04, RTL8211F_LCR, val);
 	if (ret < 0)
-		dev_dbg(dev, "Failed to update the LED control register\n");
+		printk("Failed to update the LED control register\n");
 }
 
 static int rtl8211f_config_aneg(struct phy_device *phydev)

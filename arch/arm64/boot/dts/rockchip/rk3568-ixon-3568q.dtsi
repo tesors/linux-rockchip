@@ -449,11 +449,6 @@
 		compatible = "realtek,rtl8211f";
 		reg = <1>;
 		realtek,eee-led-mode-disable;
-		realtek,led-modes = <RTL8211F_LINK_10_100_1000_ACTIVITY
-				             RTL8211F_LINK_10_100_1000_ACTIVITY
-				             RTL8211F_LINK_10_100_1000_ACTIVITY>;
-		realtek,led0-control = <RTL8211F_LINK_10_100_1000_ACTIVITY>;
-		realtek,led1-control = <RTL8211F_LINK_10_100_1000_ACTIVITY>;
 	};
 };
 
