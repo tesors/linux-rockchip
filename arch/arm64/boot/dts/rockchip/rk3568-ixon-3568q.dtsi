@@ -450,9 +450,9 @@
 };
 
 &mdio1 {
-	ethphy: ethernet-phy@1 {
-		compatible = "realtek,rtl8211f";
-		reg = <1>;
+	ethphy: ethernet-phy@0 {
+// 		compatible = "realtek,rtl8211f";
+		reg = <0>;
 	};
 };
 
@@ -462,7 +462,7 @@
 };
 
 &rgmii_phy1 {
-	status = "disabled";
+	status = "okay";
 	led_status_value = <0x6940>;
 };
 
