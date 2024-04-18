@@ -23,7 +23,61 @@
 		regulator-name = "usb3_hub_reset_n";
 		regulator-always-on;
 	};
+
+	led-controller {
+		compatible = "pwm-leds";
+		led-1 {
+			label = "ot_red_led";
+			pwms = <&pwm9 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
+		};
+		led-2 {
+			label = "ot_green_led";
+			pwms = <&pwm10 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
+		};
+		led-3 {
+			label = "pwr_red_led";
+			pwms = <&pwm14 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <100>;
+		};
+		led-4 {
+			label = "pwr_green_led";
+			pwms = <&pwm11 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
+		};
+// 		led-5 {
+// 			label = "bl_led";
+// 			pwms = <&pwm15 0 10000 0>;
+// 			max-brightness = <100>;
+// 			default-brightness = <100>;
+// 		};
+	};
+	backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm15 0 10000 0>;
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <255>;
+	};
 };
+
+
+&pmu_io_domains {
+	status = "okay";
+	pmuio1-supply = <&vcc3v3_pmu>;
+	pmuio2-supply = <&vcc3v3_pmu>;
+	vccio1-supply = <&vccio_acodec>;
+	vccio3-supply = <&vccio_sd>;
+	vccio4-supply = <&vcc_3v3>;
+	vccio5-supply = <&vcc_3v3>;
+	vccio6-supply = <&vcc_1v8>;
+	vccio7-supply = <&vcc_3v3>;
+};
+
 
 &csi2_dphy0 {
 	status = "disabled";
@@ -112,6 +166,30 @@
 	pinctrl-0 = <&i2c2m1_xfer>;
 };
 
+&i2c0{
+	/delete-node/ tcs4525@1c;
+	vdd_cpu: syr827-rk8600@40 {
+		compatible = "silergy,syr827";
+		reg = <0x40>;
+		vin-supply = <&vcc5v0_sys>;
+		vsel-gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
+		regulator-compatible = "fan53555-reg";
+		regulator-name = "vdd_cpu";
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <1390000>;
+ 		regulator-init-microvolt = <1300000>;
+		regulator-initial-mode = <1>;
+		regulator-ramp-delay = <2300>;
+		fcs,suspend-voltage-selector = <1>;
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
+
+	};
+};
+
 &i2c4{
 	status = "disabled";
 };
@@ -120,13 +198,36 @@
 	status = "disabled";
 };
 
-&pwm11 {
-	status = "disabled";
+// red OT LED
+&pwm9 {
+	status = "okay";
+	pinctrl-0 = <&pwm9m0_pins>;
 };
 
-&pwm14 {
-	status = "disabled";
+// green OT LED
+&pwm10 {
+	status = "okay";
+	pinctrl-0 = <&pwm10m0_pins>;
 };
+
+// green PWR LED
+&pwm11 {
+	status = "okay";
+	pinctrl-0 = <&pwm11m0_pins>;
+};
+
+// red PWR LED
+&pwm14 {
+	status = "okay";
+	pinctrl-0 = <&pwm14m0_pins>;
+};
+
+// PWM display backlight
+&pwm15 {
+	status = "okay";
+	pinctrl-0 = <&pwm15m0_pins>;
+};
+
 
 &i2c5 {
     status = "disabled";
@@ -203,7 +304,7 @@
 		height = <240>;
 		reset-gpios = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
 		dc-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
-		led-gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
+// 		led-gpios = <&gpio3 RK_PC5 GPIO_ACTIVE_HIGH>;
 		debug = <4>;
 		status = "okay";
 // 		bgr = <1>;
@@ -228,33 +329,41 @@
     status = "disabled";
 };
 
+&rk809_sound {
+	status = "disabled";
+};
+
 /delete-node/ &vcc3v3_vga;
+
+&combphy1_usq {
+ 	rockchip,sgmii-mac-sel = <0>; /* Use gmac0 for sgmii */
+	status = "okay";
+};
+
+&xpcs {
+	status = "okay";
+};
 
 &gmac0 {
 	/delete-property/ phy-handle;
     status = "okay";
-	tx_delay = <0x4f>;
-	rx_delay = <0x0f>;
-// 	snps,reset-gpio = <&gpio0 RK_PD5 GPIO_ACTIVE_LOW>;
-// 	snps,reset-gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_LOW>;
+	snps,reset-gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+	snps,reset-delays-us = <0 20000 100000>;
 
-	clock_in_out = "output";
-	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>;
-	assigned-clock-rates = <0>, <125000000>;
-	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>;
+	rockchip,pipegrf = <&pipegrf>;
+	rockchip,xpcs = <&xpcs>;
+	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>;
+	assigned-clock-parents = <&gmac0_xpcsclk>;
+	power-domains = <&power RK3568_PD_PIPE>;
 
-	pinctrl-names = "default";
-	pinctrl-0 = <&gmac0_gpio
-			&gmac0_miim
-			&gmac0_rx_bus2
-			&gmac0_tx_bus2
-			&gmac0_rgmii_bus
-			&gmac0_rgmii_clk>;
-	phy-mode = "rgmii";
+// 	pinctrl-names = "default";
+// 	pinctrl-0 = <&gmac0_gpio
+// 			&gmac0_miim>;
+	phys = <&combphy1_usq PHY_TYPE_SGMII>;
+	phy-mode = "sgmii";
 	fixed-link {
-		speed = <10>;
+		speed = <1000>;
 		full-duplex;
-		pause;
 	};
 };
 
@@ -270,7 +379,8 @@
 	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
 
 	pinctrl-names = "default";
-	pinctrl-0 = <&gmac1m1_miim
+	pinctrl-0 = <&gmac1_gpio
+			 &gmac1m1_miim
 		     &gmac1m1_tx_bus2
 		     &gmac1m1_rx_bus2
 		     &gmac1m1_rgmii_clk
@@ -281,49 +391,55 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	rtl_switch: switch@0 {
-		compatible = "realtek,rtl8365mb";
-		reg = <0>;
-		reset-gpios = <&gpio2 RK_PD2 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
-		switch_intc: interrupt-controller {
-			interrupt-parent = <&gpio3>;
-			interrupts = <RK_PA3 IRQ_TYPE_LEVEL_LOW>;
-			interrupt-controller;
-			#address-cells = <0>;
-			#interrupt-cells = <1>;
-		};
+	mt7530: switch@1f {
+		compatible = "mediatek,mt7531";
+		reg = <0x1f>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		interrupt-controller;
+		interrupt-parent = <&gpio3>;                              //Parent of interrupt.
+		interrupts = <RK_PA3 IRQ_TYPE_LEVEL_HIGH>;
+
+// 		reset-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+
 		ports {
 			#address-cells = <1>;
 			#size-cells = <0>;
 
 			port@0 {
 				reg = <0>;
-				label = "lan4";
+				label = "lan5";
 			};
 
 			port@1 {
 				reg = <1>;
-				label = "lan3";
+				label = "lan4";
 			};
 
 			port@2 {
 				reg = <2>;
-				label = "lan2";
+				label = "lan3";
 			};
 
 			port@3 {
 				reg = <3>;
+				label = "lan2";
+			};
+
+			port@4 {
+				reg = <4>;
 				label = "lan1";
 			};
 
-			port@6 {
+			cpu_port0: port@6 {
 				reg = <6>;
 				label = "cpu";
 				ethernet = <&gmac0>;
-				phy-mode = "rgmii";
+				phy-mode = "1000base-x";
 				fixed-link {
-					speed = <10>;
+					speed = <1000>;
 					full-duplex;
+					pause;
 				};
 			};
 		};
@@ -345,7 +461,7 @@
 
 &sdio_pwrseq {
 	status = "okay";
-	reset-gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
+	reset-rebootgpios = <&gpio3 RK_PD5 GPIO_ACTIVE_LOW>;
 	post-power-on-delay-ms = <100>;
 };
 
@@ -356,6 +472,7 @@
 };
 
 &rk809_codec {
+	status = "disabled";
     spk-ctl-gpios = <&pca9555 PCA_IO0_7 GPIO_ACTIVE_HIGH>;
 	/delete-property/ pinctrl-1;
     hp-ctl-gpios = <&gpio2 RK_PC1 GPIO_ACTIVE_HIGH>;
@@ -374,12 +491,19 @@
 };
 
 &sata1 {
-	status = "okay";
+	status = "disabled";
+};
+
+&usbhost30 {
+	status = "disabled";
+};
+
+&usbhost_dwc3 {
+	status = "disabled";
 };
 
 &sata2 {
 	status = "disabled";
-	/delete-property/ pinctrl-0;
 };
 
 &pcie2x1 {
@@ -422,6 +546,15 @@
 			<3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
+
+	gmac1{
+			gmac1_gpio: gmac1-gpio {
+				rockchip,pins =
+					/* TODO:HOt fix for LTE modem to be enabled on 5.2 board.Probably should not be in gma1 node.*/
+					<3 RK_PB3 RK_FUNC_GPIO &pcfg_output_high_pull_up>;
+			};
+		};
+
 	gmac0 {
 		gmac0_gpio: gmac0-gpio {
 			rockchip,pins =
@@ -429,8 +562,13 @@
 				<2 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>,
 				/* gmac0_rst */
 				<3 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+// 				/* gmac0_mdc */
+// 				<2 RK_PC3 2 &pcfg_pull_up>,
+// 				/* gmac0_mdio */
+// 				<2 RK_PC4 2 &pcfg_pull_up>;
 		};
 	};
+
 
 	pcie30x2 {
 		pcie30x2m1_pins: pcie30x2m1-pins {
@@ -456,7 +594,7 @@
 	display_pins: display_pins {
 		rockchip,pins =
 			<0 RK_PB6 RK_FUNC_GPIO &pcfg_pull_up>,		  //dc_gpios
-			<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>,        //led_gpios
+// 			<3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>,        //led_gpios
 			<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_up>;	      //reset_gpios
 		};
 	};
