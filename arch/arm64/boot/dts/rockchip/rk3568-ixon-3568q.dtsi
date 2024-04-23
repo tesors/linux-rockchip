@@ -5,7 +5,6 @@
  */
 
 #include "rk3568-firefly-port.dtsi"
-#include <dt-bindings/net/realtek.h>
 
 / {
 
@@ -379,8 +378,6 @@
 	assigned-clock-rates = <0>, <125000000>;
 	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
 
-// 	phy-handle = <&ethphy>;
-
 	pinctrl-names = "default";
 	pinctrl-0 = <&gmac1_gpio
 			 &gmac1m1_miim
@@ -455,8 +452,6 @@
 };
 
 &rgmii_phy1 {
-	status = "okay";
-	compatible = "realtek,rtl8211f";
 	led_status_value = <0x6940>;
 };
 
