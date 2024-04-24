@@ -228,6 +228,11 @@ config MOTORCOMM_PHY
 	help
 	  Supports the YT8010, YT8510, YT8511, YT8512 PHYs.
 
+config PHY_MXL8611X
+    bool "MaxLinear MXL8611X Ethernet PHYs"
+    help
+      Support for MaxLinear MXL8611X Ethernet PHYs.
+
 config NATIONAL_PHY
 	tristate "National Semiconductor PHYs"
 	help
