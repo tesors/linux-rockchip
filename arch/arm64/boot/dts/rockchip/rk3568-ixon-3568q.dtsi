@@ -5,6 +5,7 @@
  */
 
 #include "rk3568-firefly-port.dtsi"
+#include <dt-bindings/net/mxl-8611x.h>
 
 / {
 
@@ -452,7 +453,24 @@
 };
 
 &rgmii_phy1 {
-	led_status_value = <0x6940>;
+	reg = <0>;
+	mxl-86110,led0_cfg = <(
+			MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
+			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
+			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND |
+			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON   |
+			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON  |
+			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
+		)>;
+	mxl-86110,led1_cfg = <(
+		    MXL8611X_LEDX_CFG_LINK_UP_RX_ACT_ON |
+			MXL8611X_LEDX_CFG_LINK_UP_TX_ACT_ON |
+			MXL8611X_LEDX_CFG_TRAFFIC_ACT_BLINK_IND |
+			MXL8611X_LEDX_CFG_LINK_UP_10MB_ON |
+			MXL8611X_LEDX_CFG_LINK_UP_100MB_ON |
+			MXL8611X_LEDX_CFG_LINK_UP_1GB_ON
+		)>;
+// 	led_status_value = <0x6940>;
 };
 
 &uart8 {
