@@ -65,6 +65,9 @@
 	};
 };
 
+&sdhci {
+	compatible =  "rockchip,dwcmshc-sdhci", "rockchip,rk3568-dwcmshc", "snps,dwcmshc-sdhci";
+};
 
 &pmu_io_domains {
 	status = "okay";
