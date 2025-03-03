@@ -58,7 +58,8 @@
 // 		};
 	};
 	backlight {
-		compatible = "pwm-backlight";
+		//compatible = "pwm-backlight";
+		compatible = "rockchip,remotectl-pwm";
 		pwms = <&pwm15 0 10000 0>;
 		brightness-levels = <0 4 8 16 32 64 128 255>;
 		default-brightness-level = <255>;
