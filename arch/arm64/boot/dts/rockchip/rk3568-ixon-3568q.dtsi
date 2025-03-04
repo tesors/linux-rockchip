@@ -50,19 +50,20 @@
 			max-brightness = <100>;
 			default-brightness = <0>;
 		};
-// 		led-5 {
-// 			label = "bl_led";
-// 			pwms = <&pwm15 0 10000 0>;
-// 			max-brightness = <100>;
-// 			default-brightness = <100>;
-// 		};
+		led-5 {
+			label = "bl_led";
+			pwms = <&pwm15 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <100>;
+		};
 	};
 	backlight {
-		//compatible = "pwm-backlight";
-		compatible = "rockchip,remotectl-pwm";
-		pwms = <&pwm15 0 10000 0>;
-		brightness-levels = <0 4 8 16 32 64 128 255>;
-		default-brightness-level = <255>;
+		// compatible = "pwm-backlight";
+		compatible = "led-backlight";
+		led-names = "bl_led";
+		// pwms = <&pwm15 0 10000 0>;
+		// brightness-levels = <0 4 8 16 32 64 128 255>;
+		// default-brightness-level = <6>;
 	};
 };
 
