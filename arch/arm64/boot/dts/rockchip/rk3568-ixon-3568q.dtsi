@@ -57,14 +57,14 @@
 			default-brightness = <100>;
 		};
 	};
-	backlight {
-		// compatible = "pwm-backlight";
-		compatible = "led-backlight";
-		led-names = "bl_led";
-		// pwms = <&pwm15 0 10000 0>;
-		// brightness-levels = <0 4 8 16 32 64 128 255>;
-		// default-brightness-level = <6>;
-	};
+	// backlight {
+	// 	// compatible = "pwm-backlight";
+	// 	compatible = "led-backlight";
+	// 	led-names = "bl_led";
+	// 	// pwms = <&pwm15 0 10000 0>;
+	// 	// brightness-levels = <0 4 8 16 32 64 128 255>;
+	// 	// default-brightness-level = <6>;
+	// };
 };
 
 &sdhci {
