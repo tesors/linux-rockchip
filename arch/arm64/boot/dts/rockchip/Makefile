@@ -298,4 +298,5 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588s-tablet-v11.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-firefly-itx-3568q.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-ixon-3568q.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-radxa-e20c.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-ixon-xrouter.dtb
 endif

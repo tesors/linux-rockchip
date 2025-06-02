@@ -14,8 +14,8 @@
 #include "rk3528-linux.dtsi"
 
 / {
-	model = "Radxa E20C";
-	compatible = "radxa,e20c", "radxa,rock-2", "rockchip,rk3528a";
+	model = "Ixon xRouter";
+	compatible ="rockchip,rk3528-ixon-xrouter", "rockchip,rk3528a";
 
 	/delete-node/ chosen;
 
@@ -204,64 +204,64 @@
 
 &gpu {
 	mali-supply = <&vdd_gpu>;
-	status = "okay";
+	status = "off";
 };
 
 &gpu_bus {
 	bus-supply = <&vdd_logic>;
-	status = "okay";
+	status = "off";
 };
 
 &display_subsystem {
-	status = "okay";
+	status = "off";
 };
 
 &iep {
-	status = "okay";
+	status = "off";
 };
 
 &iep_mmu {
-	status = "okay";
+	status = "off";
 };
 
 &jpegd {
-	status = "okay";
+	status = "off";
 };
 
 &jpegd_mmu {
-	status = "okay";
+	status = "off";
 };
 
 &mpp_srv {
-	status = "okay";
+	status = "off";
 };
 
 &rga2 {
-	status = "okay";
+	status = "off";
 };
 
 &rga2_mmu {
-	status = "okay";
+	status = "off";
 };
 
 &rkvdec {
-	status = "okay";
+	status = "off";
 };
 
 &rkvdec_mmu {
-	status = "okay";
+	status = "off";
 };
 
 &rkvenc {
-	status = "okay";
+	status = "off";
 };
 
 &rkvenc_mmu {
-	status = "okay";
+	status = "off";
 };
 
 &rkvtunnel {
-	status = "okay";
+	status = "off";
 };
 
 &rockchip_suspend {
@@ -354,7 +354,6 @@
 	status = "off";
 };
 
-
 &gmac1 {
 	status = "okay";
 	snps,reset-gpio = <&gpio4 RK_PB4 GPIO_ACTIVE_LOW>;
@@ -366,19 +365,16 @@
 		     &rgmii_tx_bus2
 		     &rgmii_rx_bus2
 		     &rgmii_rgmii_clk
-		     &rgmii_rgmii_bus
-		     &switch1_gpio>;
+		     &rgmii_rgmii_bus>;
 
-	/* Use rgmii-rxid mode to disable rx delay inside Soc */
-	clock_in_out = "input";
-	phy-mode = "rgmii-rxid";
+	clock_in_out = "output";
+	phy-mode = "rgmii";
 	tx_delay = <0x30>;
-	// rx_delay = <0x10>;
+	rx_delay = <0x30>;
 
 	fixed-link {
 		speed = <1000>;
 		full-duplex;
-		pause;
 	};
 };
 
@@ -386,9 +382,9 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 
-	switch@1f {
+	switch_phy: switch@0 {
 		compatible = "mediatek,mt7531";
-		reg = <0x1f>;
+		reg = <0x0>;
 
 		ports {
 			#address-cells = <1>;
@@ -428,7 +424,6 @@
 				fixed-link {
 					speed = <1000>;
 					full-duplex;
-					pause;
 				};
 			};
 		};
