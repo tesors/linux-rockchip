@@ -204,16 +204,16 @@
 
 &gpu {
 	mali-supply = <&vdd_gpu>;
-	status = "off";
+	status = "okey";
 };
 
 &gpu_bus {
 	bus-supply = <&vdd_logic>;
-	status = "off";
+	status = "okay";
 };
 
 &display_subsystem {
-	status = "off";
+	status = "okey";
 };
 
 &iep {
@@ -438,6 +438,25 @@
 	};
 };
 
+
+&spi1 {
+	status = "okay";
+	max-freq = <32000000>;
+	pinctrl-0 = <&spi1_pins>;
+	pinctrl-1 = <&spi1_csn0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	display@0{
+		compatible = "adafruit,yx240qv29", "ilitek,ili9341";
+		reg = <0>;
+		spi-max-frequency = <32000000>;
+		dc-gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+                reset-gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_HIGH>;
+		rotation = <270>;
+	};
+};
+
 &combphy_pu {
 	status = "okay";
 };
@@ -543,6 +562,13 @@
 	keys {
 		user_key: user-key {
 			rockchip,pins = <0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+	lcd {
+		display_pins: lcd-pins {
+			rockchip,pins = <1 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>, //Reset
+			 		<1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>; //DnC
 		};
 	};
 
