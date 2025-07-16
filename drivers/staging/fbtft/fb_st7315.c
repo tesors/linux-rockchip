@@ -45,46 +45,69 @@ static int init_display(struct fbtft_par *par)
 	}
 
 	/* Set Display OFF */
-	write_reg(par, 0xAE); /*display off*/
+	write_reg(par, 0xAE);
 
-	write_reg(par, 0x00); /*set lower column address*/
-	write_reg(par, 0x10); /*set higher column address*/
-
-	write_reg(par, 0x40); /*set display start line*/
-
-	write_reg(par, 0xB0); /*set page address*/
-
-	write_reg(par, 0x81); /*contract control*/
-	write_reg(par, 0x8f); /*128*/
-
-	write_reg(par, 0xA1); /*set segment remap*/
-
-	write_reg(par, 0xA6); /*normal / reverse*/
-
-	write_reg(par, 0xA8); /*multiplex ratio*/
-	write_reg(par, 0x3F); /*duty = 1/64*/
-
-	write_reg(par, 0xC8); /*Com scan direction*/
-
-	write_reg(par, 0xD3); /*set display offset*/
-	write_reg(par, 0x00);
-
-	write_reg(par, 0xD5); /*set osc division*/
+	/* Set Display Clock Divide Ratio/ Oscillator Frequency */
+	write_reg(par, 0xD5);
 	write_reg(par, 0x80);
 
-	write_reg(par, 0xD9); /*set pre-charge period*/
-	write_reg(par, 0x22);
+	/* Set Multiplex Ratio */
+	write_reg(par, 0xA8);
+	write_reg(par, 0x3F);
 
-	write_reg(par, 0xDA); /*set COM pins*/
+	/* Set Display Offset */
+	write_reg(par, 0xD3);
+	write_reg(par, 0x0);
+
+	/* Set Display Start Line */
+	write_reg(par, 0x40 | 0x0);
+
+	/* Charge Pump Setting */
+	write_reg(par, 0x8D);
+	/* A[2] = 1b, Enable charge pump during display on */
+	write_reg(par, 0x14);
+
+	/* Set Memory Addressing Mode */
+	write_reg(par, 0x20);
+	/* Vertical addressing mode  */
+	write_reg(par, 0x01);
+
+	/* Set Segment Re-map */
+	/* column address 127 is mapped to SEG0 */
+	write_reg(par, 0xA0 | 0x1);
+
+	/* Set COM Output Scan Direction */
+	/* remapped mode. Scan from COM[N-1] to COM0 */
+	write_reg(par, 0xC8);
+
+	/* Set COM Pins Hardware Configuration */
+	write_reg(par, 0xDA);
+
+	/* A[4]=1b, Alternative COM pin configuration */
 	write_reg(par, 0x12);
 
-	write_reg(par, 0xdb); /*set vcomh*/
-	write_reg(par, 0x30);
+	/* Set Pre-charge Period */
+	write_reg(par, 0xD9);
+	write_reg(par, 0xF1);
 
-	write_reg(par, 0x8d); /*set charge pump disable*/
-	write_reg(par, 0x10);
+	/* Set VCOMH Deselect Level */
+	write_reg(par, 0xDB);
+	/* according to the datasheet, this value is out of bounds */
+	write_reg(par, 0x40);
 
-	write_reg(par, 0xAF); /*display ON*/
+	/* Entire Display ON */
+	/* Resume to RAM content display. Output follows RAM content */
+	write_reg(par, 0xA4);
+
+	/* Set Normal Display
+	 * 0 in RAM: OFF in display panel
+	 * 1 in RAM: ON in display panel
+	 */
+	write_reg(par, 0xA6);
+
+	/* Set Display ON */
+	write_reg(par, 0xAF);
+
 	return 0;
 }
 
