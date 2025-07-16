@@ -404,9 +404,9 @@ mt7530_pad_clk_setup(struct dsa_switch *ds, phy_interface_t interface)
 	case PHY_INTERFACE_MODE_TRGMII:
 		trgint = 1;
 		if (priv->id == ID_MT7621) {
-			/* PLL frequency: 125MHz: 1.0GBit */
+			/* PLL frequency: 150MHz: 1.2GBit */
 			if (xtal == HWTRAP_XTAL_40MHZ)
-				ncpo1 = 0x0640;
+				ncpo1 = 0x0780;
 			if (xtal == HWTRAP_XTAL_25MHZ)
 				ncpo1 = 0x0a00;
 		} else { /* PLL frequency: 250MHz: 2.0Gbit */
@@ -495,27 +495,21 @@ static bool mt7531_dual_sgmii_supported(struct mt7530_priv *priv)
 	u32 val;
 
 	val = mt7530_read(priv, MT7531_TOP_SIG_SR);
-   
 
-    	return false;
+	return (val & PAD_DUAL_SGMII_EN) != 0;
 }
 
 static int
 mt7531_pad_setup(struct dsa_switch *ds, phy_interface_t interface)
 {
-	return 0;
-}
-
-static void
-mt7531_pll_setup(struct mt7530_priv *priv)
-{
+	struct mt7530_priv *priv = ds->priv;
 	u32 top_sig;
 	u32 hwstrap;
 	u32 xtal;
 	u32 val;
 
 	if (mt7531_dual_sgmii_supported(priv))
-		return;
+		return 0;
 
 	val = mt7530_read(priv, MT7531_CREV);
 	top_sig = mt7530_read(priv, MT7531_TOP_SIG_SR);
@@ -594,6 +588,8 @@ mt7531_pll_setup(struct mt7530_priv *priv)
 	val |= EN_COREPLL;
 	mt7530_write(priv, MT7531_PLLGP_EN, val);
 	usleep_range(25, 35);
+
+	return 0;
 }
 
 static void
@@ -967,7 +963,7 @@ mt753x_cpu_port_enable(struct dsa_switch *ds, int port)
 	mt7530_rmw(priv, MT7530_MFC, UNM_FFP_MASK, UNM_FFP(BIT(port)));
 
 	/* Set CPU port number */
-	if (priv->id == ID_MT7530 || priv->id == ID_MT7621)
+	if (priv->id == ID_MT7621)
 		mt7530_rmw(priv, MT7530_MFC, CPU_MASK, CPU_EN | CPU_PORT(port));
 
 	/* CPU port gets connected to all user ports of
@@ -984,6 +980,9 @@ mt7530_port_enable(struct dsa_switch *ds, int port,
 		   struct phy_device *phy)
 {
 	struct mt7530_priv *priv = ds->priv;
+
+	if (!dsa_is_user_port(ds, port))
+		return 0;
 
 	mutex_lock(&priv->reg_mutex);
 
@@ -1006,6 +1005,9 @@ static void
 mt7530_port_disable(struct dsa_switch *ds, int port)
 {
 	struct mt7530_priv *priv = ds->priv;
+
+	if (!dsa_is_user_port(ds, port))
+		return;
 
 	mutex_lock(&priv->reg_mutex);
 
@@ -1667,7 +1669,6 @@ mt7530_setup(struct dsa_switch *ds)
 				ret = of_get_phy_mode(mac_np, &interface);
 				if (ret && ret != -ENODEV) {
 					of_node_put(mac_np);
-					of_node_put(phy_node);
 					return ret;
 				}
 				id = of_mdio_parse_addr(ds->dev, phy_node);
@@ -1690,6 +1691,164 @@ mt7530_setup(struct dsa_switch *ds)
 		return ret;
 
 	return 0;
+}
+
+#define XTAL_40MHZ      0
+#define XTAL_25MHZ 	1
+
+#define PLLGP_EN                        0x7820
+#define EN_COREPLL                      BIT(2)
+#define SW_CLKSW                        BIT(1)
+#define SW_PLLGP                        BIT(0)
+
+#define PLLGP_CR0                       0x78a8
+#define RG_COREPLL_EN                   BIT(22)
+#define RG_COREPLL_POSDIV_S             23
+#define RG_COREPLL_POSDIV_M             0x3800000
+#define RG_COREPLL_SDM_PCW_S            1
+#define RG_COREPLL_SDM_PCW_M            0x3ffffe
+#define RG_COREPLL_SDM_PCW_CHG          BIT(0)
+
+/* RGMII and SGMII PLL clock */
+#define ANA_PLLGP_CR2                   0x78b0
+#define ANA_PLLGP_CR5                   0x78bc
+
+static void
+mt7531_dsa_core_pll_setup(struct dsa_switch *ds)
+{
+	struct mt7530_priv *priv = ds->priv;
+        u32 hwstrap;
+        u32 val;
+
+        val = mt7530_read(priv, 0x780c);
+        if (val & BIT(1))
+                return;
+
+        hwstrap = mt7530_read(priv, 0x7800);
+
+        switch ((hwstrap & XTAL_FSEL_M) >> XTAL_FSEL_S) {
+        case XTAL_25MHZ:
+                /* Step 1 : Disable MT7531 COREPLL */
+                val = mt7530_read(priv, PLLGP_EN);
+                val &= ~EN_COREPLL;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                /* Step 2: switch to XTAL output */
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= SW_CLKSW;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_EN;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Step 3: disable PLLGP and enable program PLLGP */
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= SW_PLLGP;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                /* Step 4: program COREPLL output frequency to 500MHz */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_POSDIV_M;
+                val |= 2 << RG_COREPLL_POSDIV_S;
+                mt7530_write(priv, PLLGP_CR0, val);
+                usleep_range(25, 35);
+
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_SDM_PCW_M;
+                val |= 0x140000 << RG_COREPLL_SDM_PCW_S;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Set feedback divide ratio update signal to high */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val |= RG_COREPLL_SDM_PCW_CHG;
+                mt7530_write(priv, PLLGP_CR0, val);
+                /* Wait for at least 16 XTAL clocks */
+                usleep_range(10, 20);
+
+                /* Step 5: set feedback divide ratio update signal to low */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_SDM_PCW_CHG;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Enable 325M clock for SGMII */
+                mt7530_write(priv, ANA_PLLGP_CR5, 0xad0000);
+
+                /* Enable 250SSC clock for RGMII */
+                mt7530_write(priv, ANA_PLLGP_CR2, 0x4f40000);
+
+                /* Step 6: Enable MT7531 PLL */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val |= RG_COREPLL_EN;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= EN_COREPLL;
+                mt7530_write(priv, PLLGP_EN, val);
+                usleep_range(25, 35);
+
+                break;
+        case XTAL_40MHZ:
+                /* Step 1 : Disable MT7531 COREPLL */
+                val = mt7530_read(priv, PLLGP_EN);
+                val &= ~EN_COREPLL;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                /* Step 2: switch to XTAL output */
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= SW_CLKSW;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_EN;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Step 3: disable PLLGP and enable program PLLGP */
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= SW_PLLGP;
+                mt7530_write(priv, PLLGP_EN, val);
+
+                /* Step 4: program COREPLL output frequency to 500MHz */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_POSDIV_M;
+                val |= 2 << RG_COREPLL_POSDIV_S;
+                mt7530_write(priv, PLLGP_CR0, val);
+                usleep_range(25, 35);
+
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_SDM_PCW_M;
+                val |= 0x190000 << RG_COREPLL_SDM_PCW_S;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Set feedback divide ratio update signal to high */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val |= RG_COREPLL_SDM_PCW_CHG;
+                mt7530_write(priv, PLLGP_CR0, val);
+                /* Wait for at least 16 XTAL clocks */
+                usleep_range(10, 20);
+
+                /* Step 5: set feedback divide ratio update signal to low */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val &= ~RG_COREPLL_SDM_PCW_CHG;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                /* Enable 325M clock for SGMII */
+                mt7530_write(priv, ANA_PLLGP_CR5, 0xad0000);
+
+                /* Enable 250SSC clock for RGMII */
+                mt7530_write(priv, ANA_PLLGP_CR2, 0x4f40000);
+
+                /* Step 6: Enable MT7531 PLL */
+                val = mt7530_read(priv, PLLGP_CR0);
+                val |= RG_COREPLL_EN;
+                mt7530_write(priv, PLLGP_CR0, val);
+
+                val = mt7530_read(priv, PLLGP_EN);
+                val |= EN_COREPLL;
+                mt7530_write(priv, PLLGP_EN, val);
+                usleep_range(25, 35);
+                break;
+        }
 }
 
 static int
@@ -1730,12 +1889,24 @@ mt7531_setup(struct dsa_switch *ds)
 		return -ENODEV;
 	}
 
+	/* Force MAC link down before reset */
+	mt7530_write(priv, MT7530_PMCR_P(5), BIT(31));
+	mt7530_write(priv, MT7530_PMCR_P(6), BIT(31));
+
 	/* Reset the switch through internal reset */
 	mt7530_write(priv, MT7530_SYS_CTRL,
 		     SYS_CTRL_PHY_RST | SYS_CTRL_SW_RST |
 		     SYS_CTRL_REG_RST);
+	usleep_range(10, 20);
 
-	mt7531_pll_setup(priv);
+	/* Enable MDC input Schmitt Trigger */
+	val = mt7530_read(priv, 0x7f04);
+	mt7530_write(priv, 0x7f04, val | BIT(5));
+
+	/* Global mac control settings */
+	mt7530_write(priv, 0x30e0, (15 << 9) | (11 << 2) | 3);
+
+	mt7531_dsa_core_pll_setup(ds);
 
 	if (mt7531_dual_sgmii_supported(priv)) {
 		priv->p5_intf_sel = P5_INTF_SEL_GMAC5_SGMII;
@@ -2115,7 +2286,6 @@ mt7531_mac_config(struct dsa_switch *ds, int port, unsigned int mode,
 	case PHY_INTERFACE_MODE_NA:
 	case PHY_INTERFACE_MODE_1000BASEX:
 	case PHY_INTERFACE_MODE_2500BASEX:
-
 		if (phylink_autoneg_inband(mode))
 			return -EINVAL;
 
@@ -2299,8 +2469,6 @@ mt7531_cpu_port_config(struct dsa_switch *ds, int port)
 	default:
 		return -EINVAL;
 	}
-    	interface = PHY_INTERFACE_MODE_1000BASEX;
-    	speed = SPEED_1000;
 
 	if (interface == PHY_INTERFACE_MODE_2500BASEX)
 		speed = SPEED_2500;
@@ -2322,6 +2490,8 @@ static void
 mt7530_mac_port_validate(struct dsa_switch *ds, int port,
 			 unsigned long *supported)
 {
+	if (port == 5)
+		phylink_set(supported, 1000baseX_Full);
 }
 
 static void mt7531_mac_port_validate(struct dsa_switch *ds, int port,
@@ -2348,7 +2518,7 @@ mt753x_phylink_validate(struct dsa_switch *ds, int port,
 
 	phylink_set_port_modes(mask);
 
-	if (state->interface != PHY_INTERFACE_MODE_TRGMII &&
+	if (state->interface != PHY_INTERFACE_MODE_TRGMII ||
 	    !phy_interface_mode_is_8023z(state->interface)) {
 		phylink_set(mask, 10baseT_Half);
 		phylink_set(mask, 10baseT_Full);
@@ -2358,10 +2528,8 @@ mt753x_phylink_validate(struct dsa_switch *ds, int port,
 	}
 
 	/* This switch only supports 1G full-duplex. */
-	if (state->interface != PHY_INTERFACE_MODE_MII) {
+	if (state->interface != PHY_INTERFACE_MODE_MII)
 		phylink_set(mask, 1000baseT_Full);
-		phylink_set(mask, 1000baseX_Full);
-	}
 
 	priv->info->mac_port_validate(ds, port, mask);
 
@@ -2595,7 +2763,7 @@ mt7530_probe(struct mdio_device *mdiodev)
 		return -ENOMEM;
 
 	priv->ds->dev = &mdiodev->dev;
-	priv->ds->num_ports = MT7530_NUM_PORTS;
+	priv->ds->num_ports = DSA_MAX_PORTS;
 
 	/* Use medatek,mcm property to distinguish hardware type that would
 	 * casues a little bit differences on power-on sequence.
@@ -2639,7 +2807,7 @@ mt7530_probe(struct mdio_device *mdiodev)
 		if (IS_ERR(priv->io_pwr))
 			return PTR_ERR(priv->io_pwr);
 	}
-
+#if 0
 	/* Not MCM that indicates switch works as the remote standalone
 	 * integrated circuit so the GPIO pin would be used to complete
 	 * the reset, otherwise memory-mapped register accessing used
@@ -2653,7 +2821,7 @@ mt7530_probe(struct mdio_device *mdiodev)
 			return PTR_ERR(priv->reset);
 		}
 	}
-
+#endif
 	priv->bus = mdiodev->bus;
 	priv->dev = &mdiodev->dev;
 	priv->ds->priv = priv;

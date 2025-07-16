@@ -7,7 +7,7 @@
 #define __MT7530_H
 
 #define MT7530_NUM_PORTS		7
-#define MT7530_CPU_PORT			6
+#define MT7530_CPU_PORT			5
 #define MT7530_NUM_FDB_RECORDS		2048
 #define MT7530_ALL_MEMBERS		0xff
 
