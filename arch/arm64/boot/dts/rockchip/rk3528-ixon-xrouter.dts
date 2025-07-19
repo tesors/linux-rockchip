@@ -22,7 +22,6 @@
 	aliases {
 		mmc0 = &sdhci;
 		mmc1 = &sdmmc;
-		mmc2 = &sdio0;
 	};
 
 	vcc5v0_sys: vcc5v0-sys {
@@ -500,18 +499,8 @@
 &pcie2x1 {
 	reset-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
 	status = "okay";
-
-	pcie@0,0 {
-		reg = <0x000000 0 0 0 0>;
-		#address-cells = <3>;
-		#size-cells = <2>;
-
-		pcie_eth:pcie-eth@10,0 {
-			compatible = "pci10ec,8168";
-			reg = <0x000000 0 0 0 0>;
-			realtek,led-data = <0x007f>;
-		};
-	};
+	pinctrl-0 = <&pciem1_pins>;
+	pinctrl-1 = <&wlanen_pins>;
 };
 
 &i2c0 {
@@ -519,43 +508,34 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c0m1_xfer>;
 
-	hym8563: hym8563@51 {
-		compatible = "haoyu,hym8563";
-		reg = <0x51>;
-		#clock-cells = <0>;
-		clock-frequency = <32768>;
-		clock-output-names = "hym8563";
+	tpm@2e {
+		compatible = "infineon,slb9673","tcg,tpm-tis-i2c" ;
+		reg = <0x2e>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&hym8563_int>;
-		interrupt-parent = <&gpio4>;
-		interrupts = <RK_PA7 IRQ_TYPE_LEVEL_LOW>;
-		wakeup-source;
-	};
-};
-
-&i2c1 {
-	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c1m0_xfer>;
-
-	eeprom:	bl24c16@50 {
+		pinctrl-0 = <&slb9673_gpio>;
 		status = "okay";
-		compatible = "atmel,24c16";
-		reg = <0x50>;
-		pagesize = <16>;
 	};
+	rv3028@52 {
+		status = "okay";
+		compatible = "microcrystal,rv3028";
+		reg = <0x52>;
+		backup-switchover-mode = <0x01>;
+		trickle-resistor-ohms = <3000>;
+	};
+	touchscreen@15 {
+		compatible = "hynitron,cst816s";
+		reg = <0x15>;
+		pinctrl-0 = <&touch_panel_gpio>;
+		interrupt-parent = <&gpio1>;                              //Parent of interrupt.
+		interrupts = <RK_PC3 IRQ_TYPE_LEVEL_HIGH>;   			  //Configuration of touch panel  interrupt controller.
+		reset-gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_HIGH>;
+      };
 };
 
 &pinctrl {
 	usb {
 		vcc5v0_host_en: vcc5v0-host-en {
 			rockchip,pins = <0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
-	hym8563 {
-		hym8563_int: hym8563-int {
-			rockchip,pins = <4 RK_PA7 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -572,11 +552,34 @@
 		};
 	};
 
+	slb9673 {
+		slb9673_gpio: slb9673-gpio{
+			rockchip,pins =
+			/*TPM_RST*/
+			<4 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
 	switch1{
 		switch1_gpio: switch1-gpio {
 			rockchip,pins =
 				<4 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>,
 				<1 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	pcie {
+		wlanen_pins: wlanen_pins {
+			rockchip,pins =
+				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up_drv_level_1>; /* wlan_en */
+		};
+	};
+
+	touchscreen {
+		touch_panel_gpio: touch_panel_gpio{
+			rockchip,pins =
+			<1  RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>,			//Interupt pin
+			<1  RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>;				//Reset pin should have external 10 kOmh resistor.
 		};
 	};
 };
