@@ -81,7 +81,7 @@
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 		enable-active-high;
-		gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+		gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_HIGH>;
 		vin-supply = <&vcc5v0_sys>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&vcc5v0_host_en>;
@@ -133,6 +133,17 @@
 			  3300000 0x1>;
 	};
 
+	vccio_lte: vccio-lte {
+		compatible = "regulator-gpio";
+		regulator-name = "vccio_lte";
+		regulator-min-microvolt = <3800000>;
+		regulator-max-microvolt = <3800000>;
+		gpios = <&gpio3 RK_PB3 GPIO_ACTIVE_HIGH>;
+		vin-supply = <&vcc5v0_sys>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&vcc3v8_en>;
+	};
+
 	vcc_sd: vcc-sd {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_sd";
@@ -150,38 +161,62 @@
 		user-key {
 			label = "KEY F15";
 			linux,code = <KEY_F15>;
-			gpios = <&gpio0 RK_PA0 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio4 RK_PB1 GPIO_ACTIVE_LOW>;
 			debounce-interval = <100>;
 		};
 	};
 
-	gpio_leds: gpio-leds {
-		compatible = "gpio-leds";
-		pinctrl-names = "default";
-
-		sys-led {
-			gpios = <&gpio4 RK_PC1 GPIO_ACTIVE_LOW>;
-			linux,default-trigger = "heartbeat";
+	led-controller {
+		compatible = "pwm-leds";
+		led-1 {
+			label = "ot_red_led";
+			pwms = <&pwm6 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
 		};
-
-		wan-led {
-			gpios = <&gpio4 RK_PC0 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "netdev";
+		led-2 {
+			label = "ot_blue_led";
+			pwms = <&pwm5 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
 		};
-
-		lan-led {
-			gpios = <&gpio4 RK_PB5 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "netdev";
+		led-3 {
+			label = "pwr_red_led";
+			pwms = <&pwm4 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <100>;
+		};
+		led-4 {
+			label = "pwr_blue_led";
+			pwms = <&pwm0 0 10000 0>;
+			max-brightness = <100>;
+			default-brightness = <0>;
 		};
 	};
 };
 
-&pwm1 {
-	status = "disabled";
+// red OT LED
+&pwm6 {
+	status = "okay";
+	pinctrl-0 = <&pwm6m0_pins>;
 };
 
-&pwm2 {
+// green OT LED
+&pwm5 {
 	status = "okay";
+	pinctrl-0 = <&pwm5m0_pins>;
+};
+
+// green PWR LED
+&pwm4 {
+	status = "okay";
+	pinctrl-0 = <&pwm4m0_pins>;
+};
+
+// red PWR LED
+&pwm0 {
+	status = "okay";
+	pinctrl-0 = <&pwm0m0_pins>;
 };
 
 &cpu0 {
@@ -482,10 +517,6 @@
 	status = "okay";
 };
 
-&usbdrd30 {
-	status = "okay";
-};
-
 &usbdrd_dwc3 {
 	extcon = <&usb2phy>;
 	phys = <&u2phy_otg>;
@@ -497,10 +528,9 @@
 };
 
 &pcie2x1 {
-	reset-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 	pinctrl-0 = <&pciem1_pins>;
-	pinctrl-1 = <&wlanen_pins>;
+	// pinctrl-1 = <&wlanen_pins>;
 };
 
 &i2c0 {
@@ -532,16 +562,44 @@
       };
 };
 
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1m1_xfer &uart1_ctsn &uart1_rtsn>;
+	status = "okay";
+
+	bluetooth {
+		pinctrl-0 = <&ble_pins>;
+		compatible = "qcom,qca6174-bt";
+		enable-gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "blt_enable";
+		firmware-name = "nvm_00440302.bin";
+	};
+};
+
 &pinctrl {
 	usb {
 		vcc5v0_host_en: vcc5v0-host-en {
-			rockchip,pins = <0 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	lte {
+		vcc3v8_en: vcc3v8-en {
+			rockchip,pins = <3 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+	ble {
+		ble_pins: ble-pins {
+			rockchip,pins = <3 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>, // BLE EN
+					<3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>, // BT_DEV_WAKE
+					<1 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>; // BT_HOST_WAKE
 		};
 	};
 
 	keys {
 		user_key: user-key {
-			rockchip,pins = <0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
+			rockchip,pins = <4 RK_PB1 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
