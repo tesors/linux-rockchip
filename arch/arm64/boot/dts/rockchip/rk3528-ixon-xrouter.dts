@@ -133,13 +133,15 @@
 			  3300000 0x1>;
 	};
 
-	vccio_lte: vccio-lte {
-		compatible = "regulator-gpio";
-		regulator-name = "vccio_lte";
+	vcc3v8_bat: vcc3v8-bat-regulator {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc3v8_bat";
+		regulator-boot-on;
+		regulator-always-on;
 		regulator-min-microvolt = <3800000>;
 		regulator-max-microvolt = <3800000>;
-		gpios = <&gpio3 RK_PB3 GPIO_ACTIVE_HIGH>;
-		vin-supply = <&vcc5v0_sys>;
+		enable-active-high;
+		gpio = <&gpio3 RK_PB3 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&vcc3v8_en>;
 	};
@@ -517,6 +519,10 @@
 	status = "okay";
 };
 
+&usbdrd30 {
+	status = "okay";
+};
+
 &usbdrd_dwc3 {
 	extcon = <&usb2phy>;
 	phys = <&u2phy_otg>;
@@ -530,7 +536,8 @@
 &pcie2x1 {
 	status = "okay";
 	pinctrl-0 = <&pciem1_pins>;
-	// pinctrl-1 = <&wlanen_pins>;
+	pinctrl-1 = <&wlanen_pins>;
+	reset-gpios = <&gpio3 RK_PC3 GPIO_ACTIVE_LOW>;
 };
 
 &i2c0 {
@@ -568,11 +575,12 @@
 	status = "okay";
 
 	bluetooth {
+		compatible = "realtek,rtl8723bs-bt";
+		pinctrl-names = "default";
 		pinctrl-0 = <&ble_pins>;
-		compatible = "qcom,qca6174-bt";
-		enable-gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "blt_enable";
-		firmware-name = "nvm_00440302.bin";
+		reset-gpios = <&gpio3 RK_PB4  GPIO_ACTIVE_LOW>; /* PL4 */
+		device-wake-gpios = <&gpio3 RK_PC1  GPIO_ACTIVE_HIGH>; /* PL5 */
+		host-wakeup-gpios = <&gpio1 RK_PB3  GPIO_ACTIVE_HIGH>; /* PL6 */
 	};
 };
 
@@ -591,7 +599,7 @@
 
 	ble {
 		ble_pins: ble-pins {
-			rockchip,pins = <3 RK_PB4 RK_FUNC_GPIO &pcfg_pull_none>, // BLE EN
+			rockchip,pins = <3 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>, // BLE EN
 					<3 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>, // BT_DEV_WAKE
 					<1 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>; // BT_HOST_WAKE
 		};
@@ -629,7 +637,7 @@
 	pcie {
 		wlanen_pins: wlanen_pins {
 			rockchip,pins =
-				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up_drv_level_1>; /* wlan_en */
+				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>; /* wlan_en */
 		};
 	};
 
