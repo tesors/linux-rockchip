@@ -197,6 +197,14 @@
 	};
 };
 
+&pwm1 {
+	status = "disabled";
+};
+
+&pwm2 {
+	status = "okay";
+};
+
 // red OT LED
 &pwm6 {
 	status = "okay";
@@ -240,60 +248,60 @@
 
 &gpu {
 	mali-supply = <&vdd_gpu>;
-	status = "okey";
+	status = "disabled";
 };
 
 &gpu_bus {
 	bus-supply = <&vdd_logic>;
-	status = "okay";
+	status = "disabled";
 };
 
 &display_subsystem {
-	status = "okey";
+	status = "disabled";
 };
 
 &iep {
-	status = "off";
+	status = "disabled";
 };
 
 &iep_mmu {
-	status = "off";
+	status = "disabled";
 };
 
 &jpegd {
-	status = "off";
+	status = "disabled";
 };
 
 &jpegd_mmu {
-	status = "off";
+	status = "disabled";
 };
 
 &mpp_srv {
-	status = "off";
+	status = "disabled";
 };
 
 &rga2 {
-	status = "off";
+	status = "disabled";
 };
 
 &rga2_mmu {
-	status = "off";
+	status = "disabled";
 };
 
 &rkvdec {
-	status = "off";
+	status = "disabled";
 };
 
 &rkvdec_mmu {
-	status = "off";
+	status = "disabled";
 };
 
 &rkvenc {
-	status = "off";
+	status = "disabled";
 };
 
 &rkvenc_mmu {
-	status = "off";
+	status = "disabled";
 };
 
 &rkvtunnel {
@@ -387,7 +395,7 @@
 };
 
 &gmac0 {
-	status = "off";
+	status = "disabled";
 };
 
 &gmac1 {
@@ -536,8 +544,8 @@
 &pcie2x1 {
 	status = "okay";
 	pinctrl-0 = <&pciem1_pins>;
-	pinctrl-1 = <&wlanen_pins>;
-	reset-gpios = <&gpio3 RK_PC3 GPIO_ACTIVE_LOW>;
+	// pinctrl-1 = <&wlanen_pins>;
+	// reset-gpios = <&gpio3 RK_PC3 GPIO_ACTIVE_LOW>;
 };
 
 &i2c0 {
@@ -569,20 +577,20 @@
       };
 };
 
-&uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1m1_xfer &uart1_ctsn &uart1_rtsn>;
-	status = "okay";
+// &uart1 {
+// 	pinctrl-names = "default";
+// 	pinctrl-0 = <&uart1m1_xfer &uart1_ctsn &uart1_rtsn>;
+// 	status = "okay";
 
-	bluetooth {
-		compatible = "realtek,rtl8723bs-bt";
-		pinctrl-names = "default";
-		pinctrl-0 = <&ble_pins>;
-		reset-gpios = <&gpio3 RK_PB4  GPIO_ACTIVE_LOW>; /* PL4 */
-		device-wake-gpios = <&gpio3 RK_PC1  GPIO_ACTIVE_HIGH>; /* PL5 */
-		host-wakeup-gpios = <&gpio1 RK_PB3  GPIO_ACTIVE_HIGH>; /* PL6 */
-	};
-};
+// 	bluetooth {
+// 		compatible = "realtek,rtl8723bs-bt";
+// 		pinctrl-names = "default";
+// 		pinctrl-0 = <&ble_pins>;
+// 		reset-gpios = <&gpio3 RK_PB4  GPIO_ACTIVE_LOW>; /* PL4 */
+// 		device-wake-gpios = <&gpio3 RK_PC1  GPIO_ACTIVE_HIGH>; /* PL5 */
+// 		host-wakeup-gpios = <&gpio1 RK_PB3  GPIO_ACTIVE_HIGH>; /* PL6 */
+// 	};
+// };
 
 &pinctrl {
 	usb {
@@ -593,7 +601,7 @@
 
 	lte {
 		vcc3v8_en: vcc3v8-en {
-			rockchip,pins = <3 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
