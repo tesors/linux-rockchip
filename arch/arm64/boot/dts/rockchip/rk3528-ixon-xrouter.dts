@@ -22,6 +22,8 @@
 	aliases {
 		mmc0 = &sdhci;
 		mmc1 = &sdmmc;
+		ethernet0 = &gmac1;
+		ethernet1 = &gmac0;
 	};
 
 	vcc5v0_sys: vcc5v0-sys {
