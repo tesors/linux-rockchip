@@ -96,23 +96,9 @@
 		regulator-max-microvolt = <5000000>;
 	};
 
-	vdd_gpu: vdd_logic: vdd-logic {
-		compatible = "pwm-regulator";
-		pwms = <&pwm2 0 5000 1>;
-		regulator-name = "vdd_logic";
-		regulator-min-microvolt = <705000>;
-		regulator-max-microvolt = <1006000>;
-		regulator-init-microvolt = <900000>;
-		regulator-always-on;
-		regulator-boot-on;
-		regulator-settling-time-up-us = <250>;
-		pwm-supply = <&vcc5v0_sys>;
-		status = "okay";
-	};
-
 	vdd_cpu: vdd-cpu {
 		compatible = "pwm-regulator";
-		pwms = <&pwm1 0 5000 1>;
+		pwms = <&pwm1 0 256 1>;
 		regulator-name = "vdd_cpu";
 		regulator-min-microvolt = <746000>;
 		regulator-max-microvolt = <1201000>;
@@ -174,25 +160,25 @@
 		compatible = "pwm-leds";
 		led-1 {
 			label = "ot_red_led";
-			pwms = <&pwm6 0 10000 0>;
+			pwms = <&pwm6 0 256 0>;
 			max-brightness = <100>;
 			default-brightness = <0>;
 		};
 		led-2 {
 			label = "ot_blue_led";
-			pwms = <&pwm5 0 10000 0>;
+			pwms = <&pwm5 0 256 0>;
 			max-brightness = <100>;
 			default-brightness = <0>;
 		};
 		led-3 {
 			label = "pwr_red_led";
-			pwms = <&pwm4 0 10000 0>;
+			pwms = <&pwm4 0 256 0>;
 			max-brightness = <100>;
 			default-brightness = <100>;
 		};
 		led-4 {
 			label = "pwr_blue_led";
-			pwms = <&pwm0 0 10000 0>;
+			pwms = <&pwm0 0 256 0>;
 			max-brightness = <100>;
 			default-brightness = <0>;
 		};
@@ -201,10 +187,6 @@
 
 &pwm1 {
 	status = "disabled";
-};
-
-&pwm2 {
-	status = "okay";
 };
 
 // red OT LED
@@ -244,17 +226,14 @@
 };
 
 &dmc {
-	center-supply = <&vdd_logic>;
 	status = "okay";
 };
 
 &gpu {
-	mali-supply = <&vdd_gpu>;
 	status = "disabled";
 };
 
 &gpu_bus {
-	bus-supply = <&vdd_logic>;
 	status = "disabled";
 };
 
@@ -545,9 +524,8 @@
 
 &pcie2x1 {
 	status = "okay";
-	pinctrl-0 = <&pciem1_pins>;
-	// pinctrl-1 = <&wlanen_pins>;
-	// reset-gpios = <&gpio3 RK_PC3 GPIO_ACTIVE_LOW>;
+	pinctrl-0 = <&pciem1_pins &wlanen_pins>;
+	reset-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
 };
 
 &i2c0 {
@@ -573,26 +551,26 @@
 		compatible = "hynitron,cst816s";
 		reg = <0x15>;
 		pinctrl-0 = <&touch_panel_gpio>;
-		interrupt-parent = <&gpio1>;                              //Parent of interrupt.
-		interrupts = <RK_PC3 IRQ_TYPE_LEVEL_HIGH>;   			  //Configuration of touch panel  interrupt controller.
-		reset-gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio1>;	//Parent of interrupt.
+		interrupts = <RK_PC3 IRQ_TYPE_EDGE_RISING>;	//Configuration of touch panel  interrupt controller.
+		reset-gpios = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
       };
 };
 
-// &uart1 {
-// 	pinctrl-names = "default";
-// 	pinctrl-0 = <&uart1m1_xfer &uart1_ctsn &uart1_rtsn>;
-// 	status = "okay";
-
-// 	bluetooth {
-// 		compatible = "realtek,rtl8723bs-bt";
-// 		pinctrl-names = "default";
-// 		pinctrl-0 = <&ble_pins>;
-// 		reset-gpios = <&gpio3 RK_PB4  GPIO_ACTIVE_LOW>; /* PL4 */
-// 		device-wake-gpios = <&gpio3 RK_PC1  GPIO_ACTIVE_HIGH>; /* PL5 */
-// 		host-wakeup-gpios = <&gpio1 RK_PB3  GPIO_ACTIVE_HIGH>; /* PL6 */
-// 	};
-// };
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart1m0_xfer &uart1_ctsn &uart1_rtsn>;
+	status = "okay";
+	bluetooth {
+		compatible = "qcom,qca6174-bt";
+		firmware-name = "nvm_00440302.bin";
+		pinctrl-names = "default";
+		pinctrl-0 = <&ble_pins>;
+		enable-gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_HIGH>;
+		device-wake-gpios = <&gpio3 RK_PC1  GPIO_ACTIVE_HIGH>; /* PL5 */
+		host-wakeup-gpios = <&gpio1 RK_PB3  GPIO_ACTIVE_HIGH>; /* PL6 */
+	};
+};
 
 &pinctrl {
 	usb {
@@ -603,7 +581,7 @@
 
 	lte {
 		vcc3v8_en: vcc3v8-en {
-			rockchip,pins = <3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <3 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -647,6 +625,7 @@
 	pcie {
 		wlanen_pins: wlanen_pins {
 			rockchip,pins =
+				<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>, /* pci_rst */
 				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>; /* wlan_en */
 		};
 	};
@@ -654,8 +633,8 @@
 	touchscreen {
 		touch_panel_gpio: touch_panel_gpio{
 			rockchip,pins =
-			<1  RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>,			//Interupt pin
-			<1  RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>;				//Reset pin should have external 10 kOmh resistor.
+			<1  RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>, //Reset pin should have external 10 kOmh resistor.
+			<1  RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>;	//Interupt pin
 		};
 	};
 };
