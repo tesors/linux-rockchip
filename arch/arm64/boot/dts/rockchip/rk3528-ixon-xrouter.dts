@@ -142,6 +142,19 @@
 		vin-supply = <&vcc_3v3_s3>;
 	};
 
+	lcd_bl: lcd-bl {
+        	compatible = "regulator-fixed";
+		regulator-name = "lcd_bl";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <7500000>;
+		regulator-max-microvolt = <7500000>;
+		enable-active-high;
+        	gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&lcd_bl_pins>;
+    	};
+
 	gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
@@ -524,8 +537,9 @@
 
 &pcie2x1 {
 	status = "okay";
-	pinctrl-0 = <&pciem1_pins &wlanen_pins>;
-	reset-gpios = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>;
+	pinctrl-0 = <&pciem1_pins>;
+	pinctrl-1 = <&wlanen_pins>;
+	reset-gpios = <&gpio3 RK_PC3 GPIO_ACTIVE_HIGH>;
 };
 
 &i2c0 {
@@ -604,6 +618,9 @@
 			rockchip,pins = <1 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>, //Reset
 			 		<1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>; //DnC
 		};
+		lcd_bl_pins: lcd-bl-pins {
+			rockchip,pins = <3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
 	};
 
 	slb9673 {
@@ -625,7 +642,6 @@
 	pcie {
 		wlanen_pins: wlanen_pins {
 			rockchip,pins =
-				<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>, /* pci_rst */
 				<3 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>; /* wlan_en */
 		};
 	};
