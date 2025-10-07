@@ -426,7 +426,7 @@ mt7530_pad_clk_setup(struct dsa_switch *ds, phy_interface_t interface)
 	// 	ssc_delta = 0x57;
 	// else
 	// 	ssc_delta = 0x87;
-	ssc_delta = 0x87;
+	ssc_delta = 0x47;
 
 	mt7530_rmw(priv, MT7530_P6ECR, P6_INTF_MODE_MASK,
 		   P6_INTF_MODE(trgint));
