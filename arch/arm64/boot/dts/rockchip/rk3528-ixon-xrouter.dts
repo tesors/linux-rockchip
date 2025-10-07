@@ -299,7 +299,7 @@
 };
 
 &rkvtunnel {
-	status = "off";
+	status = "disabled";
 };
 
 &rockchip_suspend {
@@ -484,7 +484,7 @@
 	ssd1306_spi: oled@0 {
 		compatible = "sitronix,st7315"; /*"solomon,ssd1306"; */
 		reg = <0x0>;
-		spi-max-frequency = <5000000>;
+		spi-max-frequency = <6500000>;
 		buswidth = <0x8>;
 		spi-cpha;
         	spi-cpol;
